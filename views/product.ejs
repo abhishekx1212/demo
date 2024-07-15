@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>add product</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <style>
+        .myAlert {
+            position: relative;
+        }
+
+        .myAlert::after {
+            content: "";
+            position: absolute;
+            /* width: 100%; */
+            background-color: red;
+            height: 5px;
+            bottom: 0;
+            left: 0;
+            animation: loader .5s linear;
+        }
+
+        @keyframes loader {
+            0% {
+                width: 100%;
+            }
+
+            100% {
+                width: 0%;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-dark">
+    <div class="container py-3">
+        <div class="row justify-content-center" style="position: relative;">
+            <div class="col-6">
+                <div class="form-content p-3" style="border-radius: 10px; background-color: rgba(225 ,225 ,225 ,0.4 );">
+                    <h2 class="text-center text-white">Add Product</h2>
+                    <div id="note" class="note" style="width: 150px; position: absolute;right:100px;">
+                        <p class="text-white">NOTE: whenever updating the data selecting all category is important</p>
+                    </div>
+                    <form action="/product/addProduct" method="post" id="form">
+                        <input type="text" name="proName" placeholder="Enter product Name" id="proName"
+                            class="form-control border border-0"
+                            style="font-size: 20px; border-radius: 10px; background-color: rgba(225 ,225 ,225 ,0.4 );"
+                            required>
+                        <textarea name="proDescription" id="proDescription" placeholder="Enter product Description"
+                            style="border-radius: 10px; background-color: rgba(225 ,225 ,225 ,0.4 ); font-size: 20px;"
+                            class="my-2 form-control border border-0" required></textarea>
+                        <input type="text" name="proPrice" id="proPrice" placeholder="Enter product Price"
+                            style="font-size: 20px; border-radius: 10px; background-color: rgba(225 ,225 ,225 ,0.4 );"
+                            class="form-control border border-0" required>
+                        <select name="catId" id="catId" class="form-control my-2 border border-0"
+                            style="font-size: 20px; border-radius: 10px; background-color: rgba(225 ,225 ,225 ,0.4 );" required>
+                            <option value="" disabled selected>--select category--</option>
+                            <% cat.map((val=>{ %>
+                                <option value="<%= val.id %>">
+                                    <%= val.CatName %>
+                                </option>
+                                <% })) %>
+                        </select>
+                        <select name="SubCatId" id="SubCatId" class="form-control mb-2 border border-0"
+                            style="font-size: 20px;border-radius: 10px; background-color: rgba(225 ,225 ,225 ,0.4 );" required>
+                            <option value="" disabled selected>--Select subCategory--</option>
+                        </select>
+                        <select name="extraCatId" id="extraCatId" class="mb-2 form-control border border-0"
+                            style="font-size: 20px; border-radius: 10px; background-color: rgba(225 ,225 ,225 ,0.4 );" required>
+                            <option value="" disabled selected>--Select extraCategory--</option>
+                        </select>
+                        <input type="submit" name="" id="type" value="ADD" style="font-size: 20px;"
+                            class="border form-control btn-success btn">
+                    </form>
+                    <div class="prevSelect mt-3" id="prevSelect">
+                        <h4 class="text-white">Previously Selected Categories</h4>
+                        <h5 style="color: cyan;" id="catData" class=""></h5>
+                        <h5 style="color: lightcoral;" id="SubCatData"></h5>
+                        <h5 style="color: lightblue;" id="ExtraCatData"></h5>
+                    </div>
+                    <div class="mt-2">
+                        <a href="/" class="text-white" style="font-size: 18px;">Back to admin panel</a>
+                    </div>
+                    <% if (msg.length> 0) { %>
+                        <% if(msg[0]=='add' ) { %>
+                            <div class="myAlert alert alert-success mt-3 d-flex justify-content-between"
+                                style="width: 100%;">
+                                <h5>Data Added</h5>
+                                <h6><a href=""><i class="fa-solid fa-x"></i></a></h6>
+                            </div>
+                            <% } else if(msg[0]=='update' ){%>
+                                <div class="myAlert alert alert-warning mt-3 d-flex justify-content-between">
+                                    <h5>Data Updated</h5>
+                                    <h6><a href=""><i class="fa-solid fa-x"></i></a></h6>
+                                </div>
+                                <%} else {%>
+                                    <div class="myAlert alert alert-danger mt-3 d-flex justify-content-between">
+                                        <h5>Data Deleted</h5>
+                                        <h6><a href=""><i class="fa-solid fa-x"></i></a></h6>
+                                    </div>
+                                    <%}%>
+                                        <% } %>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-3 gy-3" id="row">
+
+        </div>
+    </div>
+</body>
+<script>
+    let catId = document.getElementById('catId');
+    let SubCatId = document.getElementById('SubCatId');
+    let extraCatId = document.getElementById('extraCatId');
+
+    SubCatId.style.display = 'none'
+    extraCatId.style.display = 'none'
+    document.getElementById('prevSelect').style.display = 'none'
+    document.getElementById('note').style.display = 'none'
+
+    catId.addEventListener('change', function cat() {
+        const selectedValue = this.value;
+
+        fetch('/product/getCat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ value: selectedValue })
+        }).then(() => getSubCat());
+        SubCatId.style.display = 'inline-block';
+        extraCatId.style.display = 'none';
+    })
+
+    const getSubCat = async () => {
+        let req = await fetch('/product/getCat')
+        let res = await req.json()
+        subCatData(res)
+    }
+
+    const subCatData = (subData) => {
+
+        SubCatId.innerHTML = "";
+        if (SubCatId.innerHTML === "") {
+            SubCatId.innerHTML = `<option value="">--Select Subcategory--</option>`
+        }
+        for (let val of subData) {
+            SubCatId.innerHTML += `<option value="${val._id}">${val.SubCatName}</option>`
+        }
+    }
+
+
+    SubCatId.addEventListener('change', function Subcat() {
+        const selectedValue = this.value;
+
+        fetch('/product/getExtraCat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ value: selectedValue })
+        }).then(() => getExtraCat())
+        extraCatId.style.display = 'inline-block'
+    })
+
+    const getExtraCat = async () => {
+        let req = await fetch('/product/getExtraCat')
+        let res = await req.json()
+        ExtraCatData(res)
+    }
+
+    const ExtraCatData = (ExtraData) => {
+
+        extraCatId.innerHTML = "";
+        if (extraCatId.innerHTML === "") {
+            extraCatId.innerHTML = `<option value="">--Select Extracategory--</option>`
+        }
+        for (let val of ExtraData) {
+            extraCatId.innerHTML += `<option value="${val._id}">${val.extraCatName}</option>`
+        }
+    }
+
+
+    const Add = async (product) => {
+        await fetch('/product/addProduct', {
+            method: 'post',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(product)
+        }).then(() => get())
+
+        refresh();
+    }
+
+    const Update = async (product, id) => {
+        await fetch(`/product/update/${id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(product)
+        }).then(() => get())
+
+        refresh()
+    }
+
+    let type = document.getElementById('type');
+    let proId = null;
+
+    const editProduct = async (id, Name, Description, Price, catId, SubCatId, extraCatId) => {
+        let edtData = { id, Name, Description, Price, catId, SubCatId, extraCatId };
+        document.getElementById('proName').value = edtData.Name;
+        document.getElementById('proDescription').value = edtData.Description;
+        document.getElementById('proPrice').value = edtData.Price;
+
+        document.getElementById('prevSelect').style.display = 'block';
+        document.getElementById('note').style.display = 'inline-block';
+        let oldData = {
+            catData: edtData.catId,
+            SubCatData: edtData.SubCatId,
+            ExtraCatData: edtData.extraCatId
+        }
+
+        await fetch('/product/oldData', {
+            method: 'post',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(oldData)
+        }).then(() => getoldCat())
+
+        proId = edtData.id
+        type.value = 'Update';
+    };
+
+    const getoldCat = async () => {
+        let req = await fetch('/product/oldData')
+        let res = await req.json();
+        showOldCat(res);
+    }
+
+    const showOldCat = (data) => {
+        let { getCatData, getExtraCatData, getSubCatData } = data
+        document.getElementById('catData').innerHTML = `category: ${getCatData.CatName}`;
+        document.getElementById('SubCatData').innerHTML = `Sub Category: ${getSubCatData.SubCatName}`;
+        document.getElementById('ExtraCatData').innerHTML = `Extra Category: ${getExtraCatData.extraCatName}`;
+    }
+
+    document.getElementById('form').addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        let product = {
+            proName: document.getElementById('proName').value,
+            proDescription: document.getElementById('proDescription').value,
+            proPrice: document.getElementById('proPrice').value,
+            catId: document.getElementById('catId').value,
+            SubCatId: document.getElementById('SubCatId').value,
+            extraCatId: document.getElementById('extraCatId').value,
+        }
+        // console.log(product);
+        if (type.value == 'ADD') {
+            Add(product)
+        } else {
+            Update(product, proId);
+            type.value = 'ADD'
+        }
+    })
+
+    const dataDesign = (data) => {
+        let myData = '';
+        data.map((val) => {
+            myData += `
+            <div class="col-4">
+                <div class="card dataInfo border p-2" style="background-color:rgba(225,225,225,0.8);">
+                    <h3>${val.proName}</h3>
+                    <p class="my-0" style="font-size:20px">${val.proDescription}</p>
+                    <span class="mt-2" style="display: block; font-size:19px">$${val.proPrice}</span>
+                    <button class="btn btn-danger my-2" onclick="deleteProduct('${val._id}')">Delete</button>
+                    <button class="btn btn-warning" onclick="editProduct('${val._id}','${val.proName}','${val.proDescription}','${val.proPrice}','${val.catId}','${val.SubCatId}','${val.extraCatId}')">Edit</button>
+                </div>    
+            </div>
+        `
+        })
+        document.getElementById('row').innerHTML = myData
+    }
+
+    const deleteProduct = async (id) => {
+        await fetch(`/product/delete/${id}`, {
+            method: 'DELETE'
+        }).then(() => get())
+            .catch(err => console.log(err));
+
+        refresh();
+    }
+
+    const get = async () => {
+        let req = await fetch('/product/data')
+        let res = await req.json()
+        dataDesign(res);
+    }
+    get()
+
+    const refresh = () => {
+        counter = true
+        setTimeout(() => {
+            window.location.reload()
+        }, 500)
+    };
+</script>
+
+</html>
